@@ -1,4 +1,5 @@
 import React from "react";
+import axios from "axios";
 
 // Suggested initial states
 const initialMessage = "";
@@ -61,6 +62,7 @@ export default class AppClass extends React.Component {
           : this.setState({
               message: "",
               index: this.state.index - 1,
+              steps: this.state.steps + 1,
             });
         break;
       case "up":
@@ -69,6 +71,7 @@ export default class AppClass extends React.Component {
           : this.setState({
               message: "",
               index: this.state.index - 3,
+              steps: this.state.steps + 1,
             });
         break;
       case "right":
@@ -77,6 +80,7 @@ export default class AppClass extends React.Component {
           : this.setState({
               message: "",
               index: this.state.index + 1,
+              steps: this.state.steps + 1,
             });
         break;
       case "down":
@@ -85,6 +89,7 @@ export default class AppClass extends React.Component {
           : this.setState({
               message: "",
               index: this.state.index + 3,
+              steps: this.state.steps + 1,
             });
         break;
       default:
@@ -104,23 +109,38 @@ export default class AppClass extends React.Component {
 
   onChange = (evt) => {
     // You will need this to update the value of the input.
+
+    this.setState({ email: evt.target.value });
   };
 
   onSubmit = (evt) => {
     // Use a POST request to send a payload to the server.
+
+    evt.preventDefault();
+    axios
+      .post("http://localhost:9000/api/result", {
+        x: this.getXY().x,
+        y: this.getXY().y,
+        steps: this.state.steps,
+        email: this.state.email,
+      })
+      .then((res) => {
+        this.setState({ message: res.data.message });
+      })
+      .catch((err) => this.setState({ message: err.message }));
   };
 
   render() {
     console.log(this.state);
     const { className } = this.props;
-    const { message, index } = this.state;
+    const { message, index, steps } = this.state;
 
     console.log(this.getXY());
     return (
       <div id="wrapper" className={className}>
         <div className="info">
           <h3 id="coordinates">{this.getXYMessage()}</h3>
-          <h3 id="steps">You moved 0 times</h3>
+          <h3 id="steps">You moved {steps} times</h3>
         </div>
         <div id="grid">
           {[0, 1, 2, 3, 4, 5, 6, 7, 8].map((idx) => (
@@ -152,8 +172,13 @@ export default class AppClass extends React.Component {
             reset
           </button>
         </div>
-        <form>
-          <input id="email" type="email" placeholder="type email"></input>
+        <form onSubmit={this.onSubmit}>
+          <input
+            id="email"
+            type="email"
+            placeholder="type email"
+            onChange={this.onChange}
+          ></input>
           <input id="submit" type="submit"></input>
         </form>
       </div>
