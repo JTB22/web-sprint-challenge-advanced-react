@@ -104,7 +104,7 @@ export default class AppClass extends React.Component {
     // and change any states accordingly.
 
     this.getNextIndex(evt.target.id);
-    console.log(this.state);
+    // console.log(this.state);
   };
 
   onChange = (evt) => {
@@ -131,11 +131,11 @@ export default class AppClass extends React.Component {
   };
 
   render() {
-    console.log(this.state);
+    // console.log(this.state);
     const { className } = this.props;
     const { message, index, steps } = this.state;
 
-    console.log(this.getXY());
+    // console.log(this.getXY());
     return (
       <div id="wrapper" className={className}>
         <div className="info">
@@ -148,7 +148,7 @@ export default class AppClass extends React.Component {
               key={idx}
               className={`square${idx === index - 1 ? " active" : ""}`}
             >
-              {idx === 4 ? "B" : null}
+              {idx === index - 1 ? "B" : null}
             </div>
           ))}
         </div>
