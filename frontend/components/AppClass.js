@@ -5,7 +5,7 @@ import axios from "axios";
 const initialMessage = "";
 const initialEmail = "";
 const initialSteps = 0;
-const initialIndex = 1; // the index the "B" is at
+const initialIndex = 4; // the index the "B" is at
 
 const initialState = {
   message: initialMessage,
@@ -28,8 +28,8 @@ export default class AppClass extends React.Component {
     // It it not necessary to have a state to track the coordinates.
     // It's enough to know what index the "B" is at, to be able to calculate them.
 
-    const y = Math.ceil(this.state.index / 3);
-    const x = this.state.index % 3 === 0 ? 3 : this.state.index % 3;
+    const x = (this.state.index % 3) + 1;
+    const y = Math.floor(this.state.index / 3) + 1;
 
     return { x, y };
   };
@@ -45,7 +45,7 @@ export default class AppClass extends React.Component {
   reset = () => {
     // Use this helper to reset all states to their initial values.
 
-    this.setState(initialState);
+    this.setState({ ...initialState });
   };
 
   getNextIndex = (direction) => {
@@ -58,7 +58,7 @@ export default class AppClass extends React.Component {
     switch (direction) {
       case "left":
         x === 1
-          ? this.setState({ message: "You can't move left" })
+          ? this.setState({ message: "You can't go left" })
           : this.setState({
               message: "",
               index: this.state.index - 1,
@@ -67,7 +67,7 @@ export default class AppClass extends React.Component {
         break;
       case "up":
         y === 1
-          ? this.setState({ message: "You can't move up" })
+          ? this.setState({ message: "You can't go up" })
           : this.setState({
               message: "",
               index: this.state.index - 3,
@@ -76,7 +76,7 @@ export default class AppClass extends React.Component {
         break;
       case "right":
         x === 3
-          ? this.setState({ message: "You can't move right" })
+          ? this.setState({ message: "You can't go right" })
           : this.setState({
               message: "",
               index: this.state.index + 1,
@@ -85,7 +85,7 @@ export default class AppClass extends React.Component {
         break;
       case "down":
         y === 3
-          ? this.setState({ message: "You can't move down" })
+          ? this.setState({ message: "You can't go down" })
           : this.setState({
               message: "",
               index: this.state.index + 3,
@@ -102,7 +102,6 @@ export default class AppClass extends React.Component {
   move = (evt) => {
     // This event handler can use the helper above to obtain a new index for the "B",
     // and change any states accordingly.
-
     this.getNextIndex(evt.target.id);
     // console.log(this.state);
   };
@@ -110,7 +109,7 @@ export default class AppClass extends React.Component {
   onChange = (evt) => {
     // You will need this to update the value of the input.
 
-    this.setState({ email: evt.target.value });
+    this.setState({ ...this.state, email: evt.target.value });
   };
 
   onSubmit = (evt) => {
@@ -126,8 +125,12 @@ export default class AppClass extends React.Component {
       })
       .then((res) => {
         this.setState({ message: res.data.message });
+        this.setState({ email: "" });
       })
-      .catch((err) => this.setState({ message: err.message }));
+      .catch((err) => {
+        this.setState({ message: err.response.data.message });
+        console.log(err);
+      });
   };
 
   render() {
@@ -140,15 +143,17 @@ export default class AppClass extends React.Component {
       <div id="wrapper" className={className}>
         <div className="info">
           <h3 id="coordinates">{this.getXYMessage()}</h3>
-          <h3 id="steps">You moved {steps} times</h3>
+          <h3 id="steps">
+            You moved {steps} {steps == 0 || steps > 1 ? "times" : "time"}
+          </h3>
         </div>
         <div id="grid">
           {[0, 1, 2, 3, 4, 5, 6, 7, 8].map((idx) => (
             <div
               key={idx}
-              className={`square${idx === index - 1 ? " active" : ""}`}
+              className={`square${idx === index ? " active" : ""}`}
             >
-              {idx === index - 1 ? "B" : null}
+              {idx === index ? "B" : null}
             </div>
           ))}
         </div>
@@ -178,6 +183,7 @@ export default class AppClass extends React.Component {
             type="email"
             placeholder="type email"
             onChange={this.onChange}
+            value={this.state.email}
           ></input>
           <input id="submit" type="submit"></input>
         </form>
